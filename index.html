@@ -337,6 +337,16 @@
 
     </div>
 
+     <!-- COUNTDOWN SCREEN -->
+
+
+
+    <div id="countdown-screen">
+      <p id="countdown-text">3</p>
+
+
+    </div>
+
     <!-- COUNTDOWN SCREEN -->
      <div id="game-over-screen"
      
@@ -362,28 +372,196 @@
       </div>
       <button class="btn" id="restart-btn">Play Again</button>
     </div>
-
-  </div>
 </div>
 
-        </div>
-      </div>
-    </div>
+
+
+// ============================================================
+// Line Lock — Traffic Routing Survival Game
+// =======================================================
 <script>
 
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const titleScreen = document.getElementById('title-screen');
+  const countdownScreen = document.getElementById('countdown-screen');
+  const countdownText = document.getElementById('countdown-text');
+  const gameOverScreen = document.getElementById('game-over-screen');
+  const deathReason = document.getElementById('death-reason');
 
-  
+
+  // color plates
+
+  const colorPlates =[
+    '#ff6b6b', '#4d96ff', '#6bcb77', '#ffd93d',
+  '#ff6fb7', '#9b59b6', '#00d2d3', '#ff9f43',
+  ];
+
+  // Gmae Costants
+
+  const DOT_FREE_SPEED = 50;
+  const DOT_ROAD_SPEED = 220;
+  const DOT_RADIUS = 5;
+  const DOT_CAPTURE_RADIUS = 15;
+  const DOT_HUB_RADIUS = 18;
+  const DOT_GATE_RADIUS = 22;
+  const ROAD_MIN_LENGTH = 25;
+  const MAX_DOTS = 250;
+  const INITIAL_HUB_PAIRS = 3;
+
+  const INITIAL_SPAWN_INTERVAL = 3000;
+
+  //.  Gae State
+
+  let gameState = 'title'; // 'title', 'countdown', 'playing', 'gameover'
+  let hubs = [], gates = [], dots = [], roads = [];
+  let elapsedTime = 0;
+  let nextPairId = 20, pairInterval = 20;
+  let lastTimestamp = 0;
+  let spawnMultiplier = 0;
+  let animationId = null;
+  let usedColors = new Set();
+
+
+  // --- Input State
+
+let isDrawing = false;
+let drawStartX = 0, drawStartY = 0;
+let drawCurrentX = 0, drawCurrentY = 0;
+
+
+// Resize canvas to fit window
+
+function  resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+}
+
+function canvasX(cx) {
+  const r = canvas.getBoundingClientRect();
+  return (cx - r.left) * (canvas.width / r.width);
+}
+
+function canvasY(cy) {
+  const r = canvas.getBoundingClientRect();
+  return (cy - r.top) * (canvas.height / r.height);
+}
+
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
-</body>
-
-
-
-
-
-
-
-
 
 
 
 </body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
