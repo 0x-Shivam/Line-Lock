@@ -70,4 +70,135 @@
   #title-screen { display: flex; }
   
 
-  test
+ #overlay.active {
+    pointer-events: all;
+  }
+
+  /* ---- Shared panel style ---- */
+  #title-screen, #game-over-screen, #countdown-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: clamp(1rem, 3vw, 2rem);
+    pointer-events: all;
+    background: rgba(10,10,20,0.92);
+    border: 2px solid rgba(255,255,255,0.1);
+    max-width: min(600px, 92vw);
+    width: 100%;
+  }
+
+  #title-screen {
+    display: flex;
+
+  }
+
+
+  /*Typography*/
+
+
+  h1{
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: #fff;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+  }
+
+  .tagline {
+    font-family: 'Press Start 2P', monospace;
+    color: #555;
+    font-size: clamp(0.45rem, 1.2vw, 0.65rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: clamp(0.8rem, 2vw, 1.5rem);
+   
+  }
+
+  /* ---- Info grid ---- */
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.4rem, 1vw, 0.7rem);
+    width: 100%;
+    margin-bottom: clamp(0.8rem, 2vw, 1.5rem);
+  }
+
+  .info-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: clamp(0.5rem, 1.5vw, 0.9rem);
+    text-align: left;
+  }
+
+  .info-card.full-width { grid-column: 1 / -1; }
+
+  .info-card h3 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.4rem, 1vw, 0.6rem);
+    color: #ccc;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .info-card p {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.4rem, 0.1vw, 0.6rem);
+    color: #777;
+    line-height: 1.6;
+  }
+
+  .info-card ul { list-style: none; padding-left: 0; }
+  .info-card li { padding: 0.1rem 0; padding-left: 0.8rem; position: relative; }
+  .info-card li::before { content: '>'; position: absolute; left: 0; color: #555; }
+
+  .hl-red { color: #ff6b6b; }
+  .hl-blue { color: #4d96ff; }
+  .hl-green { color: #6bcb77; }
+
+  /* ---- Buttons ---- */
+
+  .btn {
+    font-family: 'Press Start 2P', monospace;
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.25);
+    color: #fff;
+    padding: clamp(0.5rem, 1.5vw, 0.8rem) clamp(1.2rem, 3vw, 2.5rem);
+    font-size: clamp(0.5rem, 1.3vw, 0.75rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+
+  .btn:hover { border-color: #fff; background: rgba(255,255,255,0.06); }
+  .btn:active { background: rgba(255,255,255,0.12); }
+
+  /* ---- Legend ---- */
+  .legend {
+    display: flex;
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+    margin-top: clamp(0.6rem, 1.5vw, 1rem);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+   .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #666;
+    font-size: clamp(0.35rem, 0.9vw, 0.55rem);
+  }
+
+
+  .legend-dot {
+    width: clamp(6px, 1.2vw, 8px);
+    height: clamp(6px, 1.2vw, 8px);
+    border-radius: 50%;
+    box-shadow: 0 0 4px currentColor;
+  }
