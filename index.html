@@ -267,4 +267,123 @@
      .info-grid { grid-template-columns: 1fr; }
   }
 
-  @media (min-width: 1200px)
+  @media (min-width: 1200px) {
+    #game-container { max-width: 1400px; max-height: 900px; }
+  }
+
+  </style>
+</head>
+
+<body>
+    <!-- TITLE SCREEN -->
+    <div id="title-screen">
+      <h1>Flow State</h1>
+      <p class="tagline">Traffic Routing Survival</p>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>&gt;&gt; Objective</h3>
+          <p>Guide colored dots from their <span class="hl-blu">hubs</span> to matching <span class="hl-grn">gates</span> by drawing roads. Survive.</p>
+        </div>
+        <div class="info-card">
+          <h3>!! Death</h3>
+          <ul>
+            <li>Two <span class="hl-red">different</span> colored dots collide</li>
+            <li>Any dot drifts <span class="hl-red">off-screen</span></li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>[] Controls</h3>
+          <ul>
+            <li><span class="hl-blu">Click + Drag</span> to draw a road</li>
+            <li>Release to place permanently</li>
+            <li>Mouse or touch works</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>--&gt; Road Rules</h3>
+          <ul>
+            <li>Roads are <span class="hl-blu">one-way</span> -- arrow shows direction</li>
+            <li>Roads are <span class="hl-red">permanent</span> -- plan ahead</li>
+            <li>Minimum length: 25px</li>
+          </ul>
+        </div>
+        <div class="info-card full-width">
+          <h3>i How It Works</h3>
+          <p>Dots <span class="hl-blu">drift slowly</span> toward their gate. Touch a road -- <span class="hl-red">lock on</span> and speed to the end, then resume drifting. <b>Same-color dots are safe; different colors must stay apart.</b></p>
+        </div>
+      </div>
+
+      <button class="btn" id="start-btn">Start Game</button>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b"></div> Red</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#4d96ff"></div> Blue</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#6bcb77"></div> Green</div>
+        <div class="legend-item" style="color:#555">+ 5 more</div>
+      </div>
+    </div>
+
+
+
+
+
+    <!-- COUNTDOWN SCREEN -->
+
+
+
+    <div id="countdown-screen">
+      <p id="countdown-text">3</p>
+
+
+    </div>
+
+    <!-- COUNTDOWN SCREEN -->
+     <div id="game-over-screen"
+     
+     <h2>Game Over</h2>
+     <p id="death-reason"></p>
+
+      <div class="stats-row">
+        <div class="stat-badge">
+          <div class="stat-value" id="stat-time">0:00</div>
+          <div class="stat-label">Time</div>
+        </div>
+        <div class="stat-badge">
+          <div class="stat-value" id="stat-dots">0</div>
+          <div class="stat-label">Dots</div>
+          <div class="stat-badge">
+          <div class="stat-value" id="stat-roads">0</div>
+          <div class="stat-label">Roads</div>
+        </div>
+        <div class="stat-badge">
+          <div class="stat-value" id="stat-colors">0</div>
+          <div class="stat-label">Colors</div>
+        </div>
+      </div>
+      <button class="btn" id="restart-btn">Play Again</button>
+    </div>
+
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+<script>
+
+
+  
+</script>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+</body>
