@@ -38,13 +38,36 @@
     cursor: crosshair;
   }
 
-
-  #overlay {
+#overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     display: flex;
-    
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
   }
+
+  #overlay.active {
+    pointer-events: all;
+  }
+
+  /* ---- Shared panel style ---- */
+  #title-screen, #game-over-screen, #countdown-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: clamp(1rem, 3vw, 2rem);
+    pointer-events: all;
+    background: rgba(10,10,20,0.92);
+    border: 2px solid rgba(255,255,255,0.1);
+    max-width: min(600px, 92vw);
+    width: 100%;
+  }
+  #title-screen { display: flex; }
+  
+
+  test
