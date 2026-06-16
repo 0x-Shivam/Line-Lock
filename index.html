@@ -527,6 +527,275 @@ class Road {
 
 // HELPERS
 
+function rnd(a, b) { return a + Math.random()*(b-a); }
+function dist(x1,y1,x2,y2) { return Math.sqrt((x2-x1)**2 + (y2-y1)**2); }
+
+function pointToSegmentDist(px, py, x1, y1, x2, y2) {
+  const dx = x2-x1, dy = y2-y1, ls = dx*dx+dy*dy;
+  if (ls === 0) return { dist: dist(px,py,x1,y1), t: 0 };
+  let t = ((px-x1)*dx + (py-y1)*dy) / ls;
+  t = Math.max(0, Math.min(1, t));
+  return { dist: dist(px, py, x1+t*dx, y1+t*dy), t };
+}
+
+function closestPointOnSegment(px, py, x1, y1, x2, y2) {
+  const dx = x2-x1, dy = y2-y1, ls = dx*dx+dy*dy;
+  if (ls === 0) return { x:x1, y:y1, t:0 };
+  let t = ((px-x1)*dx + (py-y1)*dy) / ls;
+  t = Math.max(0, Math.min(1, t));
+  return { x: x1+t*dx, y: y1+t*dy, t };
+}
+
+function tryCaptureDot(dot) {
+  if (dot.state !== 'free') return null;
+  let best = null, bestD = Infinity;
+  for (const r of roads) {
+    if (r === dot.lastRoadRef) continue;
+    const { dist: d } = pointToSegmentDist(dot.x, dot.y, r.x1, r.y1, r.x2, r.y2);
+    if (d < DOT_CAPTURE_RADIUS && d < bestD) { bestD = d; best = r; }
+  }
+  return best;
+}
+
+function colorName(hex) {
+  const m = { '#ff6b6b':'red','#4d96ff':'blue','#6bcb77':'green','#ffd93d':'yellow',
+              '#ff6fb7':'pink','#9b59b6':'purple','#00d2d3':'cyan','#ff9f43':'orange' };
+  return m[hex] || 'unknown';
+}
+
+
+
+// Lay out hubs and gates
+
+function generateLayout() {
+  hubs = []; gates = []; roads = []; dots = [];
+  const uc = new Set();
+  const w = canvas.width, h = canvas.height;
+  const M = Math.min(60, w * 0.05);
+
+  for (let i=0; i<INITIAL_HUB_PAIRS; i++) {
+    const c = COLORS[i]; uc.add(c);
+
+    let hx, hy, tries = 0;
+    do { 
+      hx = rnd(M, w*0.25); hy = rnd(M, h-M); tries++;
+    }
+    while (tries<50 && hubs.some(h=>dist(hx,hy,h.x,h.y)<HUB_RADIUS*4));
+    tries = 0;
+    let gx, gy;
+    do { gx = rnd(w*0.75, w-M); gy = rnd(M, h-M); tries++; }
+    while (tries<50 && gates.some(g=>dist(gx,gy,g.x,g.y)<GATE_RADIUS*4));
+    hubs.push(new Hub(hx, hy, c));
+    gates.push(new Gate(gx, gy, c));
+  }
+  return uc;
+}
+
+
+
+function addNewHubGatePair(uc) {
+  const av = COLORS.filter(c => !uc.has(c));
+  if (!av.length) return false;
+  const c = av[0]; uc.add(c);
+  const w = canvas.width, h = canvas.height;
+  const M = Math.min(60, w * 0.05);
+  let hx, hy, tries = 0;
+  do { hx = rnd(M, w*0.25); hy = rnd(M, h-M); tries++; }
+  while (tries<50 && hubs.some(h=>dist(hx,hy,h.x,h.y)<HUB_RADIUS*4));
+  tries = 0;
+  let gx, gy;
+  do { gx = rnd(w*0.75, w-M); gy = rnd(M, h-M); tries++; }
+  while (tries<50 && gates.some(g=>dist(gx,gy,g.x,g.y)<GATE_RADIUS*4));
+  hubs.push(new Hub(hx, hy, c));
+  gates.push(new Gate(gx, gy, c));
+  return true;
+}
+
+
+// SPAWN & DIFFICULTY.  --- // 
+
+function spawnDot(hub, timestamp) {
+  const g = gates.find(g => g.color === hub.color);
+  if (!g) return;
+  const a = Math.random() * Math.PI * 2;
+  const o = rnd(0, hub.radius*0.5);
+  dots.push(new Dot(hub.x+Math.cos(a)*o, hub.y+Math.sin(a)*o, hub.color, g));
+}
+
+
+function capDots() {
+  while (dots.length > MAX_DOTS) dots.shift();
+}
+
+function updateDifficulty(dt) {
+  elapsedTime += dt;
+  spawnMultiplier = 1 + Math.floor(elapsedTime/60)*1.5;
+  const bi = INITIAL_SPAWN_INTERVAL / spawnMultiplier;
+  hubs.forEach(h => h.spawnInterval = Math.max(400, bi));
+  nextPairTime -= dt;
+  if (nextPairTime <= 0 && hubs.length < COLORS.length) {
+    if (addNewHubGatePair(usedColors)) {
+      pairInterval = Math.max(15, pairInterval-3);
+      nextPairTime = pairInterval;
+    }
+  }
+}
+
+
+
+
+// UPDATE -- //
+
+function updateSpawning(now) {
+  for (const h of hubs) {
+    if (now - h.lastSpawnTime >= h.spawnInterval) {
+      h.lastSpawnTime = now;
+      spawnDot(h);
+    }
+  }
+}
+
+function updateDots(dt) {
+  for (const dot of dots) {
+    if (dot.state === 'free') {
+      const gx = dot.targetGate.x, gy = dot.targetGate.y;
+      const dx = gx-dot.x, dy = gy-dot.y;
+      const d  = Math.sqrt(dx*dx+dy*dy) || 1;
+      const str = 0.5;
+      dot.vx += ((dx/d)*dot.speed - dot.vx) * str * dt * 3;
+      dot.vy += ((dy/d)*dot.speed - dot.vy) * str * dt * 3;
+      const m = Math.sqrt(dot.vx*dot.vx+dot.vy*dot.vy);
+      if (m>0) { dot.vx=(dot.vx/m)*dot.speed; dot.vy=(dot.vy/m)*dot.speed; }
+      dot.x += dot.vx*dt; dot.y += dot.vy*dt;
+
+      if (dot.lastRoadRef) {
+        const { dist: d2 } = pointToSegmentDist(
+          dot.x, dot.y, dot.lastRoadRef.x1, dot.lastRoadRef.y1,
+          dot.lastRoadRef.x2, dot.lastRoadRef.y2);
+        if (d2 > DOT_CAPTURE_RADIUS*1.5) dot.lastRoadRef = null;
+      }
+
+      const road = tryCaptureDot(dot);
+      if (road) {
+        dot.state = 'on_road'; dot.roadRef = road;
+        const { t } = closestPointOnSegment(dot.x, dot.y, road.x1, road.y1, road.x2, road.y2);
+        dot.roadProgress = t;
+        dot.x = road.x1 + road.ux*road.length*t;
+        dot.y = road.y1 + road.uy*road.length*t;
+      }
+    } else {
+      const road = dot.roadRef;
+      dot.roadProgress += (DOT_ROAD_SPEED/road.length)*dt;
+      if (dot.roadProgress >= 1.0) {
+        dot.state = 'free';
+        dot.lastRoadRef = dot.roadRef;
+        dot.roadRef = null; dot.roadProgress = 0;
+        dot.x = road.x2; dot.y = road.y2;
+        const gx = dot.targetGate.x, gy = dot.targetGate.y;
+        const dx = gx-dot.x, dy = gy-dot.y;
+        const d  = Math.sqrt(dx*dx+dy*dy) || 1;
+        dot.speed = DOT_FREE_SPEED;
+        dot.vx = (dx/d)*dot.speed; dot.vy = (dy/d)*dot.speed;
+      } else {
+        dot.x = road.x1 + road.ux*road.length*dot.roadProgress;
+        dot.y = road.y1 + road.uy*road.length*dot.roadProgress;
+        dot.vx = road.ux*DOT_ROAD_SPEED; dot.vy = road.uy*DOT_ROAD_SPEED;
+      }
+    }
+  }
+}
+
+function checkGateArrivals() {
+  for (let i = dots.length-1; i >= 0; i--) {
+    const dot = dots[i], g = dot.targetGate;
+    if (dist(dot.x, dot.y, g.x, g.y) < g.radius+dot.radius) dots.splice(i,1);
+  }
+}
+
+function checkCollisions() {
+  const w = canvas.width, h = canvas.height;
+  for (let i = 0; i < dots.length; i++) {
+    for (let j = i+1; j < dots.length; j++) {
+      const a = dots[i], b = dots[j];
+      if (a.color === b.color) continue;
+      if (dist(a.x,a.y,b.x,b.y) < a.radius+b.radius) {
+        return { hit:true, reason: `${colorName(a.color)} + ${colorName(b.color)} collided!` };
+      }
+    }
+    const d = dots[i];
+    if (d.x<-10 || d.x>w+10 || d.y<-10 || d.y>h+10) {
+      return { hit:true, reason: 'Dot drifted off-screen!' };
+    }
+  }
+  return { hit:false };
+}
+
+
+// GAME LOOP // 
+
+function update(dt, now) {
+  updateSpawning(now);
+  updateDots(dt);
+  checkGateArrivals();
+  capDots();
+  updateDifficulty(dt);
+}
+
+function gameLoop(ts) {
+  if (gamestart !== 'playing') return;
+  if (!lastTimestamp) lastTimestamp = ts;
+  let dt = (ts - lastTimestamp) / 1000;
+  lastTimestamp = ts;
+  if (dt > 0.1) dt = 0.1;
+  if (dt <= 0) dt = 0.016;
+
+  update(dt, ts);
+  const { hit, reason } = checkCollisions();
+  if (hit) {
+    endGame(reason);
+    return;
+  }
+  render();
+  animationId = requestAnimationFrame(gameLoop);
+}
+
+
+// RENDERING
+
+
+function drawBg() {
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#0d0d1a'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)'; ctx.lineWidth = 1;
+  const gs = 40;
+  for (let x=0; x<w; x+=gs) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y=0; y<h; y+=gs) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+}
+
+
+function arrowHead(x, y, angle, sz, col) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+  ctx.fillStyle = col; ctx.beginPath();
+  ctx.moveTo(0,0); ctx.lineTo(-sz*2.5,-sz); ctx.lineTo(-sz*2.5,sz); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+
+
+function drawRoad(){
+  for (const r of roads) {
+    ctx.strokeStyle = 'rgba(200,200,220,0.5)'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(r.x1,r.y1); ctx.lineTo(r.x2,r.y2); ctx.stroke();
+    arrowHead(r.x2, r.y2, r.angle, 6, 'rgba(200,200,220,0.7)');
+    ctx.fillStyle = 'rgba(200,200,220,0.5)'; ctx.beginPath();
+    ctx.arc(r.x1, r.y1, 3, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+
+
+
+
 
 
 
