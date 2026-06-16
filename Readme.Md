@@ -6,6 +6,9 @@ Goal is to prevent from getting colid.
 
 ## Play Here -- https://linelock.netlify.app/  
 
+# Ai use 
+None 
+used google for js documentation
 
 # How to play 
  
