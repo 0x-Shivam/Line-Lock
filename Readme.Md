@@ -4,6 +4,8 @@
 Lock line is web game. it vector puzzel drawing game build for fun. Guide colored dots to their matching destination gates by drawing custom paths, avoiding catastrophic collisions along the way.
 Goal is to prevent from getting colid.
 
+## Play Here -- https://linelock.netlify.app/  
+
 
 # How to play 
  
