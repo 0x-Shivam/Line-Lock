@@ -13,15 +13,15 @@ Goal is to prevent from getting colid.
 - *Avoid Collision* The most imp thing don;t let dots of differnt color colid with each other 
 
 # Tech 
-**Frontend** --
-**Logic** --    
+- **Frontend:** HTML5 Canvas, CSS3
+- **Logic:** Vanilla JavaScript (ES6+)
 
 Project Structure
 
 ```text
 lineways/
-│
 ├── index.html  
+```
 
 # License 
 
