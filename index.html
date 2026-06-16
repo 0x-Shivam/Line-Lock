@@ -275,6 +275,11 @@
 </head>
 
 <body>
+  <div id="game-container">
+  <canvas id="game"></canvas>
+  <div id="overlay">
+    </div>
+</div>
     <!-- TITLE SCREEN -->
     <div id="title-screen">
       <h1>Flow State</h1>
@@ -376,10 +381,11 @@
 
 
 
-// ============================================================
-// Line Lock — Traffic Routing Survival Game
-// =======================================================
+
+
 <script>
+// Line Lock — Traffic Routing Survival Game
+
 
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
@@ -906,13 +912,6 @@ function render() {
 
 
 }
-
-
-
-
-
-
-
 
 
 // INPUT
