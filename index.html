@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Flow State</title>
+<title>Line Lock</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -282,7 +282,7 @@
 </div>
     <!-- TITLE SCREEN -->
     <div id="title-screen">
-      <h1>Flow State</h1>
+      <h1>Line Lock </h1>
       <p class="tagline">Traffic Routing Survival</p>
 
       <div class="info-grid">
@@ -399,7 +399,7 @@
 
   // color plates
 
-  const colorPlates =[
+  const COLORS  =[
     '#ff6b6b', '#4d96ff', '#6bcb77', '#ffd93d',
   '#ff6fb7', '#9b59b6', '#00d2d3', '#ff9f43',
   ];
@@ -427,6 +427,7 @@
   let lastTimestamp = 0;
   let spawnMultiplier = 0;
   let animationId = null;
+  let nextPairTime = 20;
   let usedColors = new Set();
 
 
@@ -469,7 +470,7 @@ resizeCanvas();
 class Hub {
   constructor(x, y, color) {
     this.x = x; this.y = y; this.color = color;
-    this.radius = HUB_RADIUS;
+    this.radius = DOT_HUB_RADIUS;
     this.spawnInterval = INITIAL_SPAWN_INTERVAL;
     this.lastSpawnTime = 0;
     this.pulsePhase = Math.random() * Math.PI * 2;
@@ -481,18 +482,11 @@ class Hub {
 class Gate {
   constructor(x, y, color) {
     this.x = x; this.y = y; this.color = color;
-    this.radius = GATE_RADIUS;
+    this.radius = DOT_GATE_RADIUS;
     this.rotation = Math.random() * Math.PI * 2;
   }
 }
 
-class Gate {
-  constructor(x, y, color) {
-    this.x = x; this.y = y; this.color = color;
-    this.radius = DOT_GATE_RADIUS;
-    this.roattion = Math.random() * MAth.PI * 2;
-  }
-}
 
 
 class DOT {
@@ -586,11 +580,11 @@ function generateLayout() {
     do { 
       hx = rnd(M, w*0.25); hy = rnd(M, h-M); tries++;
     }
-    while (tries<50 && hubs.some(h=>dist(hx,hy,h.x,h.y)<HUB_RADIUS*4));
+    while (tries<50 && hubs.some(h=>dist(hx,hy,h.x,h.y)<DOT_HUB_RADIUS*4));
     tries = 0;
     let gx, gy;
     do { gx = rnd(w*0.75, w-M); gy = rnd(M, h-M); tries++; }
-    while (tries<50 && gates.some(g=>dist(gx,gy,g.x,g.y)<GATE_RADIUS*4));
+    while (tries<50 && gates.some(g=>dist(gx,gy,g.x,g.y)<DOT_GATE_RADIUS*4));
     hubs.push(new Hub(hx, hy, c));
     gates.push(new Gate(gx, gy, c));
   }
@@ -607,11 +601,11 @@ function addNewHubGatePair(uc) {
   const M = Math.min(60, w * 0.05);
   let hx, hy, tries = 0;
   do { hx = rnd(M, w*0.25); hy = rnd(M, h-M); tries++; }
-  while (tries<50 && hubs.some(h=>dist(hx,hy,h.x,h.y)<HUB_RADIUS*4));
+  while (tries<50 && hubs.some(h=>dist(hx,hy,h.x,h.y)<DOT_HUB_RADIUS*4));
   tries = 0;
   let gx, gy;
   do { gx = rnd(w*0.75, w-M); gy = rnd(M, h-M); tries++; }
-  while (tries<50 && gates.some(g=>dist(gx,gy,g.x,g.y)<GATE_RADIUS*4));
+  while (tries<50 && gates.some(g=>dist(gx,gy,g.x,g.y)<DOT_GATE_RADIUS*4));
   hubs.push(new Hub(hx, hy, c));
   gates.push(new Gate(gx, gy, c));
   return true;
@@ -966,7 +960,7 @@ canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 //. GAME STATE.  
 
-function beingGame() {
+function beginGame() {
   resizeCanvas();
   usedColors = generateLayout();
   dots =[];
@@ -1028,7 +1022,7 @@ function endGame(reason) {
   overlay.classList.add('active');
   isDrawing = false;
 
-  ccanvas.style.filter = 'brightness(0.6) saturate(0.5)';
+  canvas.style.filter = 'brightness(0.6) saturate(0.5)';
   setTimeout(() => canvas.style.filter = '', 400);
   render();
 }
@@ -1045,8 +1039,8 @@ document.getElementById('restart-btn').addEventListener('click', restartGame);
 
 // Tab Blur 
 
-document.addEventListener('Visibilitychange', () => {
-if (document.hidden && gamestate === 'playing') lastTimestamp = 0;
+document.addEventListener('visibilitychange', () => {
+if (document.hidden && gameState === 'playing') lastTimestamp = 0;
 });
 
 
