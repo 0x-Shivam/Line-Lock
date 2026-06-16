@@ -792,6 +792,120 @@ function drawRoad(){
   }
 }
 
+function drawRoadPreview() {
+  if (!isDrawing) return;
+  const dx = drawCurrentX-drawStartX, dy = drawCurrentY-drawStartY;
+  const len = Math.sqrt(dx*dx+dy*dy);
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2;
+  ctx.setLineDash([8,6]); ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(drawStartX,drawStartY); ctx.lineTo(drawCurrentX,drawCurrentY); ctx.stroke();
+  ctx.setLineDash([]);
+  if (len > 10) arrowHead(drawCurrentX, drawCurrentY, Math.atan2(dy,dx), 5, 'rgba(255,255,255,0.5)');
+}
+
+
+
+function drawHub(hub, t) {
+  const p = 1 + Math.sin(t*0.003+hub.pulsePhase)*0.15;
+  const gr = hub.radius*2.2*p;
+  const g = ctx.createRadialGradient(hub.x,hub.y,hub.radius*0.5, hub.x,hub.y,gr);
+  g.addColorStop(0, hub.color+'88'); g.addColorStop(1, hub.color+'00');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(hub.x,hub.y,gr,0,Math.PI*2); ctx.fill();
+
+  const m = ctx.createRadialGradient(hub.x-2,hub.y-2,hub.radius*0.2, hub.x,hub.y,hub.radius*p);
+  m.addColorStop(0,'#fff'); m.addColorStop(0.4,hub.color); m.addColorStop(1,hub.color+'88');
+  ctx.fillStyle = m; ctx.beginPath(); ctx.arc(hub.x,hub.y,hub.radius*p,0,Math.PI*2); ctx.fill();
+
+  ctx.strokeStyle = hub.color; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(hub.x,hub.y,hub.radius*p+1,0,Math.PI*2); ctx.stroke();
+}
+
+
+function drawGate(gate, t) {
+  const rot = gate.rotation + t*0.0008;
+  for (let i=0; i<4; i++) {
+    const sa = rot + (i*Math.PI*2)/4;
+    const ea = sa + Math.PI*2/4 - 0.3;
+    ctx.strokeStyle = gate.color; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(gate.x,gate.y,gate.radius,sa,ea); ctx.stroke();
+  }
+  ctx.strokeStyle = gate.color+'44'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(gate.x,gate.y,gate.radius*0.65,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle = gate.color+'88'; ctx.beginPath(); ctx.arc(gate.x,gate.y,3,0,Math.PI*2); ctx.fill();
+}
+
+
+
+
+
+function drawDot(dot) {
+  const gr = dot.radius*3;
+  const g = ctx.createRadialGradient(dot.x,dot.y,dot.radius*0.3, dot.x,dot.y,gr);
+  g.addColorStop(0, dot.color+'aa'); g.addColorStop(1, dot.color+'00');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(dot.x,dot.y,gr,0,Math.PI*2); ctx.fill();
+
+  const m = ctx.createRadialGradient(dot.x-1,dot.y-1,0, dot.x,dot.y,dot.radius);
+  m.addColorStop(0,'#fff'); m.addColorStop(0.5,dot.color); m.addColorStop(1,dot.color+'88');
+  ctx.fillStyle = m; ctx.beginPath(); ctx.arc(dot.x,dot.y,dot.radius,0,Math.PI*2); ctx.fill();
+
+  if (dot.state === 'on_road') {
+    ctx.strokeStyle = '#ffffff88'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(dot.x,dot.y,dot.radius+3,0,Math.PI*2); ctx.stroke();
+  }
+}
+
+function drawHUD() {
+  const s = Math.floor(elapsedTime);
+  const ts = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.font = `${Math.max(10, canvas.width*0.012)}px "Press Start 2P", monospace`;
+  ctx.textAlign = 'left';
+  ctx.fillText(ts, 12, Math.max(20, canvas.height*0.032));
+  ctx.fillText(`dots:${dots.length}`, 12, Math.max(38, canvas.height*0.06));
+  ctx.fillText(`clr:${hubs.length}`, 12, Math.max(56, canvas.height*0.088));
+
+  const bw = Math.max(60, canvas.width*0.08), bh = 3;
+  const bx = canvas.width-bw-12, by = Math.max(18, canvas.height*0.028);
+  const prog = 1 - (nextPairTime/pairInterval);
+  ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(bx, by, bw, bh);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillRect(bx, by, bw*Math.max(0,Math.min(1,prog)), bh);
+
+  ctx.textAlign = 'right';
+  ctx.font = `${Math.max(8, canvas.width*0.009)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  const label = hubs.length<COLORS.length ? `new:${Math.ceil(Math.max(0,nextPairTime))}s` : 'all colors';
+  ctx.fillText(label, canvas.width-12, Math.max(14, canvas.height*0.02));
+}
+
+
+
+function render() {
+  const t = performance.now();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBg();
+  drawRoads();
+  drawRoadPreview();
+  hubs.forEach(h => drawHub(h, t));
+  gates.forEach(g => drawGate(g, t));
+  dots.forEach(d => drawDot(d));
+  drawHUD();
+}
+
+function render() {
+  const t = performance.now();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBg()
+  drawRoads();
+  drawRoadPreview();
+  hubs.forEach(h => drawHub(h, t));
+  gates.forEach(g => drawGate(g, t));
+  dots.forEach(d => drawDot(d));
+  drawHUD();
+
+
+}
 
 
 
@@ -801,7 +915,54 @@ function drawRoad(){
 
 
 
+// INPUT
 
+
+function eventPos(e) {
+   if (e.touches?.length) return { x:canvasX(e.touches[0].clientX), y:canvasY(e.touches[0].clientY) };
+  if (e.changedTouches?.length) return { x:canvasX(e.changedTouches[0].clientX), y:canvasY(e.changedTouches[0].clientY) };
+  return { x:canvasX(e.clientX), y:canvasY(e.clientY) };
+}
+
+function onDown(e) {
+  if (gameState !== 'playing') return;
+  e.preventDefault();
+  isDrawing =true; 
+  drawStartX = p.x; drawStartY = p.y;
+  drawCurrentX = p.x; drawCurrentY = p.y;
+
+}
+
+
+function onMove(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+  drawCurrentX = p.x; drawCurrentY = p.y;
+}
+
+
+
+function onUp(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+  const p = eventPos(e);
+  drawCurrentX = p.x; drawCurrentY = p.y;
+  const dx = drawCurrentX-drawStartX, dy = drawCurrentY-drawStartY;
+  if (Math.sqrt (dx*dx+dy*dy) >= ROAD_MIN_LENGTH) {
+    roads.push(new Road(drawStartX, drawStartY, drawCurrentX, drawCurrentY));
+  }
+  isDrawing = false;
+
+}
+
+canvas.addEventListener('mousedown', onDown);
+canvas.addEventListener('mousemove', onMove);
+canvas.addEventListener('mouseup', onUp);
+canvas.addEventListener('mouseleave', onUp);
+canvas.addEventListener('touchstart', onDown, { passive:false });
+canvas.addEventListener('touchmove', onMove, { passive:false });
+canvas.addEventListener('touchend', onUp);
+canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 
 
