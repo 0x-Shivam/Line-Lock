@@ -745,7 +745,7 @@ function update(dt, now) {
 }
 
 function gameLoop(ts) {
-  if (gameStart !== 'playing') return;
+  if (gameState !== 'playing') return; // <--- FIXED
   if (!lastTimestamp) lastTimestamp = ts;
   let dt = (ts - lastTimestamp) / 1000;
   lastTimestamp = ts;
