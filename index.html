@@ -965,7 +965,134 @@ canvas.addEventListener('touchend', onUp);
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 
+//. GAME STATE.  
 
+function beingGame() {
+  resizeCanvas();
+  usedColors = generateLayout();
+  dots =[];
+  roads = [];
+  elapsedTime = 0;
+  lastTimestamp = 0;
+  nextPairTime = 30; pairInterval = 30;
+  spawnMultiplier = 1.0; isDrawing = false;
+  
+
+  const now = performance.now();
+  hubs.forEach((h,i) => h.lastSpawnTime = now - i*(INITIAL_SPAWN_INTERVAL/INITIAL_HUB_PAIRS));
+
+  gameState = 'playing';
+  overlay.classList.remove('active');
+  render();
+  animationId = requestAnimationFrame(gameLoop);
+}
+
+
+function startCountdown(){
+  titleScreen.style.display ='none';
+  countdownScreen.style.display = 'flex';
+  gameState = 'countdown';
+
+
+  const steps = ['3','2','1','GO!'];
+  let i = 0;
+  countdownText.textContent = steps[i];
+  i++;
+
+  const timer = setInterval(() => {
+    if (i < steps.length) {
+      countdownText.textContent = steps[i];
+      i++;
+    } else {
+      clearInterval(timer);
+      countdownScreen.style.display = 'none';
+      countdownText.textContent = '3';
+      beginGame();
+    }
+  }, 800);
+
+}
+
+function endGame(reason) {
+  gameState = 'over';
+  if (animationId) {cancelAnimationFrame(animationId); 
+  animationId = null; }
+
+  const s = Math.floor(elapsedTime);
+  document.getElementById('stat-time').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+  document.getElementById('stat-dots').textContent = dots.length;
+  document.getElementById('stat-roads').textContent = roads.length;
+  document.getElementById('stat-colors').textContent = hubs.length;
+
+  deathReason.textContent = reason;
+  gameOverScreen.style.display = 'flex';
+  overlay.classList.add('active');
+  isDrawing = false;
+
+  ccanvas.style.filter = 'brightness(0.6) saturate(0.5)';
+  setTimeout(() => canvas.style.filter = '', 400);
+  render();
+}
+
+function restartGame() {
+  canvas.style.filter = '';
+  gameOverScreen.style.display = 'none';
+  startCountdown();
+}
+
+document.getElementById('start-btn').addEventListener('click', startCountdown);
+document.getElementById('restart-btn').addEventListener('click', restartGame);
+
+
+// Tab Blur 
+
+document.addEventListener('Visibilitychange', () => {
+if (document.hidden && gamestate === 'playing') lastTimestamp = 0;
+});
+
+
+// TITLE BACKGROUND ANIMATION
+
+function titleBg() {
+  if (gameState !== 'title') return;
+  resizeCanvas();
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#0d0d1a'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = 'rgba(255,255,255,0.02)'; ctx.lineWidth = 1;
+  for (let x=0; x<w; x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y=0; y<h; y+=40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  const t = performance.now()*0.001;
+  const dc = COLORS.slice(0,3);
+  for (let i=0; i<3; i++) {
+    const cx = w*0.14, cy = h*(0.22+i*0.28), c = dc[i];
+    const gx = w*0.86, gy = cy;
+
+    const glow = ctx.createRadialGradient(cx,cy,8, cx,cy,32);
+    glow.addColorStop(0, c+'55');
+    glow.addColorStop(1, c+'00');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx,cy,32,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = c; ctx.beginPath(); ctx.arc(cx,cy,12,0,Math.PI*2); ctx.fill();
+    
+    ctx.strokeStyle = c; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(gx,gy,16,0,Math.PI*2); ctx.stroke();
+const tr = ((t*0.5+i*0.7)%1.5)/1.5;
+    const tx = cx + (gx-cx)*(0.2+tr*0.6);
+    const ty = cy + (gy-cy)*(0.2+tr*0.6) + Math.sin(t*2+i)*12;
+    ctx.fillStyle = c; ctx.beginPath(); ctx.arc(tx,ty,5,0,Math.PI*2); ctx.fill();
+
+    ctx.strokeStyle = c+'22'; ctx.lineWidth = 1; ctx.setLineDash([4,6]);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(gx,gy); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  requestAnimationFrame(titleBg);
+}
+
+resizeCanvas(); titleBg();
+
+</script>
+</body>
+</html>
 
 
 
