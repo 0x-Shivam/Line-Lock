@@ -353,31 +353,34 @@
     </div>
 
     <!-- COUNTDOWN SCREEN -->
-     <div id="game-over-screen"
-     
-     <h2>Game Over</h2>
-     <p id="death-reason"></p>
+     <div id="game-over-screen">
+      <h2>Game Over</h2>
+      <p id="death-reason"></p>
 
       <div class="stats-row">
+        
         <div class="stat-badge">
           <div class="stat-value" id="stat-time">0:00</div>
           <div class="stat-label">Time</div>
         </div>
+        
         <div class="stat-badge">
           <div class="stat-value" id="stat-dots">0</div>
           <div class="stat-label">Dots</div>
-          <div class="stat-badge">
+        </div> <div class="stat-badge">
           <div class="stat-value" id="stat-roads">0</div>
           <div class="stat-label">Roads</div>
         </div>
+        
         <div class="stat-badge">
           <div class="stat-value" id="stat-colors">0</div>
           <div class="stat-label">Colors</div>
         </div>
+
       </div>
+      
       <button class="btn" id="restart-btn">Play Again</button>
     </div>
-</div>
 
 
 
@@ -742,7 +745,7 @@ function update(dt, now) {
 }
 
 function gameLoop(ts) {
-  if (gamestart !== 'playing') return;
+  if (gameStart !== 'playing') return;
   if (!lastTimestamp) lastTimestamp = ts;
   let dt = (ts - lastTimestamp) / 1000;
   lastTimestamp = ts;
@@ -782,7 +785,7 @@ function arrowHead(x, y, angle, sz, col) {
 
 
 
-function drawRoad(){
+function drawRoads(){
   for (const r of roads) {
     ctx.strokeStyle = 'rgba(200,200,220,0.5)'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(r.x1,r.y1); ctx.lineTo(r.x2,r.y2); ctx.stroke();
@@ -893,19 +896,6 @@ function render() {
   drawHUD();
 }
 
-function render() {
-  const t = performance.now();
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBg()
-  drawRoads();
-  drawRoadPreview();
-  hubs.forEach(h => drawHub(h, t));
-  gates.forEach(g => drawGate(g, t));
-  dots.forEach(d => drawDot(d));
-  drawHUD();
-
-
-}
 
 
 // INPUT
@@ -920,16 +910,16 @@ function eventPos(e) {
 function onDown(e) {
   if (gameState !== 'playing') return;
   e.preventDefault();
-  isDrawing =true; 
+  const p = eventPos(e); // <--- ADD THIS LINE
+  isDrawing = true; 
   drawStartX = p.x; drawStartY = p.y;
   drawCurrentX = p.x; drawCurrentY = p.y;
-
 }
-
 
 function onMove(e) {
   if (!isDrawing) return;
   e.preventDefault();
+  const p = eventPos(e); // <--- ADD THIS LINE
   drawCurrentX = p.x; drawCurrentY = p.y;
 }
 
